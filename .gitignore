@@ -1,2 +1,5 @@
+/.vscode
 /target
 /src/gba_bios.bin
+/src/*.GBA
+/src/*.bin
