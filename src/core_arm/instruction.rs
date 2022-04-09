@@ -137,7 +137,7 @@ impl Instruction {
             0x121 => {Some(bx(byte))},
             0xA00 | 0xB00 => {Some(branch(byte))},
             0x400 | 0x600 | 0x700 | 0x780 | 0x7C0 | 0x7E0 | 0x7F0 => {Some(single_data_transfer(byte))},
-            // 0x09 => {Some(signed_data_transfer(byte))}, //This instruction clashes with multiply
+            0x09 => {Some(signed_data_transfer(byte))}, //This instruction clashes with multiply
             0x800| 0x900 | 0x980 | 0x9C0 | 0x9E0 | 0x9F0 => {Some(block_data_transfer(byte))},
 
             0x109 | 0x329 => {Some(swap(byte))},
@@ -152,6 +152,7 @@ impl Instruction {
 
     /// These instructions take only 1 CPU Cycle
     fn data_operand(byte: u32) -> Option<Instruction> {
+        let condition: u8 = ((byte) & (0x0F << 28));
         // let operand_2: u16 = 0;
         let immediate: u8 = (((byte) && ( 1 << 25 )) >> 25 ) as u8;
         match immediate {
@@ -198,7 +199,20 @@ impl Instruction {
     }
 
     fn bx(byte: u32){
+        let conditions: u8 = (((byte) & F0000000) >> 28) as u8;
+        let link: u8 = ((byte) & (0x01 << 24));
 
+        let offset: u32 =((byte) & (0xFF_FFFF));
+
+        if link == (Bit::Set as u32) {
+            // write old PC -> R14 of current bank
+            // Must adjust PC to compensate for prefetch operation
+            // CPSR is not saved with PC, R14[1:0] are cleared always
+        }
+
+        else{
+            // Do non linking logic here
+        }
     }
 
     fn branch(byte: u32){

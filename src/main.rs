@@ -1,9 +1,16 @@
 
-use std::fs::{File, self};
-use std::env;
-use std::io::{prelude::*, BufReader};
-use std::path::Path;
+use std::fs::{File};
+// use std::env;
+use std::io::{prelude::*};
+// use std::path::Path;
 
+mod core_arm;
+
+mod prelude {
+    pub use crate::core_arm::*;
+}
+
+use prelude::*;
 
 fn load_bios() -> [u8; 16384] {
     let filename  = "src/gba_bios.bin";
@@ -17,9 +24,24 @@ fn load_bios() -> [u8; 16384] {
 
     };
 
+    print!("{:?}",res);
 
     buffer
 }
+
+// fn load_rom() -> Vec<u8> {
+//     let mut ram = core_arm::ram::RAM::RAM::new();
+
+//     let result = ram.load_rom("src/pokemon_emerald.GBA");
+
+//     let v = match result {
+
+//         Ok(result) => {result},
+//         Err(error) => print!("Something went wrong: {}", error),
+//     };
+
+//     v
+// }
 
 fn main() -> Result<(), ()>{
     
