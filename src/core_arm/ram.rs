@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
 use std::result::Result;
-use std::path::Path;
+// use std::path::Path;
 
 // use std::error::Error;
 
@@ -65,7 +65,7 @@ impl RAM{
 
 
         for b in buffer.iter() {
-            self.bios.push(b as u32);
+            self.bios.push(*b as u32);
         }
     }
 
@@ -90,8 +90,8 @@ impl RAM{
 
             else{
                 let shift = (0xff) & (*byte as u32);
-                curr |= (shift << ( 24 - (8 * i))  ) ;
-                i+=1;
+                curr |= shift << ( 24 - (8 * i));
+                i += yeah1;
             }
             
         }
@@ -129,7 +129,7 @@ impl RAM{
             // 0x07000000 ..= 0x070003FF => {/* Object Attributable Memory */},
             
             // ROM special Cases
-            0x08000000 ..= 0x0CFFFFFF => {/* Game Pak ROMs */self.read_word_rom(address-0x08000000)},//apply offset to correctly index inside vec repr
+            0x08000000 ..= 0x0CFFFFFF => {/* Game Pak ROMs */self.read_word_rom((address-0x08000000).try_into().unwrap())},//apply offset to correctly index inside vec repr
 
             // Cart RAM
             // 0x0E000000 ..= 0x0EFFFFFF | 
@@ -156,7 +156,6 @@ impl RAM{
         //     0x00 => { self.game_rom[address as usize]}
         //     _ => { panic!("Unimplemented")}
         // }
-        assert!(address>=0);
         self.game_rom[address as usize]
     }
 }

@@ -148,7 +148,7 @@ impl CPU {
 
     pub fn execute(&mut self, instruction: T)
     where T: Instruction {
-          //TODO: Verify this increment as we generate it after executing the instruction
+        // TODO: Verify this increment as we generate it after executing the instruction
         let increment = match self.prev {
           State::ARM => 2 as i32,
           State::THUMB => 4 as i32,
