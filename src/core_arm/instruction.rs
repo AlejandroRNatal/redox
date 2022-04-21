@@ -136,8 +136,10 @@ impl Inst<u32> for Instruction<u32> {
 
             //bits (20-27 | 4-7)-> 12 bits
             //Filter by top 8 bits and bottom 4 | To determine which operation it is
-            let filter: u16 = (((word >> 16) as u16 & 0xFF0) | ((word >> 20) as u16 & 0x0F)) as u16;
-            
+            let top: u16 = ((word >> 16 ) as u16) & 0x0ff0;
+            let bottom: u16 = ((word >> 4) as u16) & 0x000f;
+            // let filter: u16 = (((word >> 16) as u16 & 0xFF0) | ((word >> 20) as u16 & 0x0F)) as u16;
+            let filter = top | bottom; 
             dbg!("Received: {:?} | extracted: {:?}", word, filter);
             
             match filter {
@@ -155,7 +157,9 @@ impl Inst<u32> for Instruction<u32> {
                 // 0xE00 => {Some(cdp(word))},
                 // 0xC00 | 0xD00 | 0xD80 | 0xDC0 | 0xDE0 | 0xDF0 => {Some(cdt(word))},
                 // 0xE01 | 0xE21 => {Some(crt(word))},
-                0x301 => {Some(Instruction::<u32>::Undefined(word))}, //Undefined instruction according to manual
+
+                //TODO: Verify these numbers
+                0x601 => {Some(Instruction::<u32>::Undefined(word))}, //Undefined instruction according to manual
                 _ => {unimplemented!("Oh-oh! Unimplemented Instruction")},
             }
         }   
@@ -374,17 +378,16 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_DataProcessing_from_word(){
+    fn test_data_processing_from_word(){
         let word: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000;
         let inst = Instruction::<u32>::from_word(word).unwrap();
         assert_eq!(inst.tag, Instructions::DataProcessing); 
     }
 
-
-    // #[test]
-    // fn test_NOP_from_word(){
-    //     let word: u32 = 0b0000_0000_0011_0000_0000_0000_0001_0000;
-    //     let inst = Instruction::<u32>::from_word(word).unwrap();
-    //     assert_eq!(inst.tag, Instructions::NOP); 
-    // }
+    #[test]
+    fn test_nop_from_word(){
+        let word: u32 = 0b0000_0110_0000_0000_0000_0000_0001_0000;
+        let inst = Instruction::<u32>::from_word(word).unwrap();
+        assert_eq!(inst.tag, Instructions::NOP); 
+    }
 }
