@@ -91,7 +91,7 @@ impl RAM{
             else{
                 let shift = (0xff) & (*byte as u32);
                 curr |= shift << ( 24 - (8 * i));
-                i += yeah1;
+                i += 1;
             }
             
         }
@@ -152,10 +152,6 @@ impl RAM{
     }
 
     pub fn read_word_rom(&self, address: u16) -> u32 {
-        // match address {
-        //     0x00 => { self.game_rom[address as usize]}
-        //     _ => { panic!("Unimplemented")}
-        // }
         self.game_rom[address as usize]
     }
 }
@@ -164,6 +160,7 @@ impl RAM{
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn test_load_rom() {
         let rom = "src/pokemon_emerald.GBA";

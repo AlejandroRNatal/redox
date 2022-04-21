@@ -47,8 +47,6 @@ struct ControlFlags {
     cout: u32
 }
 
-
-
 impl ALU {
     
     pub fn arm_imm_op(&self, source: T, destination: T, operation:&dyn for<'a> Fn(&'a u32, &'a u32) -> u32, operand2: T){

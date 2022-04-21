@@ -1,7 +1,9 @@
+
 pub mod RegisterFile {
     pub const PC_ADDRESS: usize = 15;
     pub const SP_ADDRESS: usize = 13;
 
+    #[derive(Copy, Clone, Debug)]
     pub enum Mode {
         // PSR_MODE=0x1f, 
         PSR_MODE_USER=0x10,
@@ -13,6 +15,7 @@ pub mod RegisterFile {
         PSR_MODE_UND=0x1b,
     }
 
+    #[derive(Copy, Clone, Debug)]
     pub struct RegisterFile {
         pub mode: Mode,
         pub gp_registers: [u32; 16],
@@ -265,7 +268,6 @@ pub mod RegisterFile {
                 PSR_MODE_SYS => {self.cpsr},
                 _ => {panic!("Something went wrong wit PSR!")}
             }
-            // self.spsr
         }
     
         
@@ -321,7 +323,6 @@ mod tests {
 
         assert_eq!(register_file.r13_irq, 0x03007fa0 as u32);
         assert_eq!(register_file.r13_svc, 0x03007fe0 as u32);
-        
     }
 
 }
