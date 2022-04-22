@@ -1,4 +1,4 @@
-
+#![allow(unused_imports)]
 use std::fs::{File};
 // use std::env;
 use std::io::{prelude::*};
@@ -10,7 +10,7 @@ mod prelude {
     pub use crate::core_arm::*;
 }
 
-use prelude::*;
+// use prelude::*;
 
 fn load_bios() -> [u8; 16384] {
     let filename  = "src/gba_bios.bin";
@@ -29,26 +29,37 @@ fn load_bios() -> [u8; 16384] {
     buffer
 }
 
-// fn load_rom() -> Vec<u8> {
-//     let mut ram = core_arm::ram::RAM::RAM::new();
+fn load_rom() -> Vec<u8> {
+    let memory_bus = core_arm::ram::RAM::new();
 
-//     let result = ram.load_rom("src/pokemon_emerald.GBA");
+    let result = memory_bus.load_rom("src/pokemon_emerald.GBA");
 
-//     let v = match result {
+    let v = match result {
 
-//         Ok(result) => {result},
-//         Err(error) => print!("Something went wrong: {}", error),
-//     };
+        Ok(result) => {result},
+        Err(error) => {print!("Something went wrong: {}", error); Vec::<u8>::new()},
+    };
 
-//     v
-// }
+    v
+}
 
 fn main() -> Result<(), ()>{
     
-    let bios = load_bios();
+    // let bios = load_bios();
+    // println!("BIOS:");
+    // for i in bios.into_iter() {
+    //     print!("{:#01x}\t", i);
+    // }
+    // print!("{:?}", bios);
+    // println!("-------\n");
 
-    for i in bios.into_iter() {
-        print!("{:#01x}\t", i);
-    }
+    // println!("ROM:");
+    // let rom = load_rom();
+
+    // for i in rom.into_iter() {
+    //     print!("{:#01x}\t", i);
+    // }
+    // print!("{:?}", rom);
+    // println!("-------\n");
     Ok(())
 }

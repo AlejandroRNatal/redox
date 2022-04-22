@@ -1,5 +1,19 @@
 // Instruction decoder based off
 // ARM7tdmi Manual: https://www.dwedit.org/files/ARM7TDMI.pdf
+#![allow(clippy::upper_case_acronyms)]
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+#![allow(unused_doc_comments)]
+
+macro_rules! shift_right {
+    ($data: tt, $amount: tt) => { { $data >> $amount} };
+}
+
+macro_rules! apply_mask {
+    ($bits: tt , $mask: tt) => { $bits & $mask };
+}
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum OpCode {
@@ -131,20 +145,19 @@ impl Inst<u32> for Instruction<u32> {
         self.cycles
     }
 
-
     fn from_word(word: u32) -> Option<Instruction::<u32>> {
-
             //bits (20-27 | 4-7)-> 12 bits
             //Filter by top 8 bits and bottom 4 | To determine which operation it is
-            let top: u16 = ((word >> 16 ) as u16) & 0x0ff0;
+            let shifted:u16 = shift_right!(word , 16) as u16;
+            let top: u16 = apply_mask!(shifted, 0x0ff0) as u16;
             let bottom: u16 = ((word >> 4) as u16) & 0x000f;
-            // let filter: u16 = (((word >> 16) as u16 & 0xFF0) | ((word >> 20) as u16 & 0x0F)) as u16;
             let filter = top | bottom; 
-            dbg!("Received: {:?} | extracted: {:?}", word, filter);
+            
+            dbg!("Received: {:?} | Extracted: {:?}", word, filter);
             
             match filter {
                 0 => {/* DATA Processing / PSR Instruction here*/ Some(Instruction::<u32>::DataProcessing(word))},
-                // /*0x09 |*/ 0x19 | 0x39  => {Some(multiply(word))},
+                0x09 | 0x19 | 0x29 | 0x39  => {Some(Instruction::<u32>::Multiply(word))},
                 // 0x89 | 0xC9 | 0xE9 | 0xF9 => {Some(multiply_long(word))},
                 // 0x121 => {Some(bx(word))},
                 // 0xA00 | 0xB00 => {Some(branch(word))},
@@ -168,37 +181,47 @@ impl Inst<u32> for Instruction<u32> {
 impl Instruction<u32> {
 
     pub fn Multiply(word: u32) -> Self {
-        let rs: u32 = 0;
-        let rm: u32 = 0;
-
-        let rn: u32 = 0;
-        let rd: u32 = 0;
-
-        let rd_lo: u32 = 0;
         
-        let set: Bit = Bit::Unset;//TODO: Properly check this
-        let accumulate: Bit = Bit::Unset;
+        let _rs = shift_right!(word, 8);
+        let rs: u32 = apply_mask!(_rs, 0xF);
+        
+        let rm: u32 = apply_mask!(word, 0xF);
 
-        let signed: Bit = Bit::Unset;
+        let _rn = shift_right!(word, 12);
+        let rn: u32 = apply_mask!(_rn, 0xF);
 
-        let cond = 0;//TODO: Filter out conditions
+        let _rd = shift_right!(word, 16);
+        let rd: u32 = apply_mask!(_rd, 0xF);
+
+        let rd_lo: u32 = 0;//Doesnt apply
+        
+        let _s = shift_right!(word, 20);
+        let set: Bit = Bit::bit_from(apply_mask!(_s, 0x01));//TODO: Properly check this
+        
+        let _acc = shift_right!(word, 21);
+        let accumulate = Bit::bit_from(apply_mask!(_acc, 0x01));
+
+        let signed: Bit = Bit::Unset;//Doesnt matter here 
+
+        let _cond = shift_right!(word, 28);
+        let cond = apply_mask!(_cond, 0xF);
 
         Instruction::<u32> {
-            rs: rs,
-            rm: rm,
-            rd_lo: rd_lo,
-            rn: rn,
-            rd: rd,
+            rs,
+            rm,
+            rd_lo,
+            rn,
+            rd,
 
             // Discriminant factors
             tag: Instructions::Multiply,
-            set : set,
+            set,
             accumulate: Some(accumulate),
             signed: Some(signed),
             
             // Data for all the Instructions
-            word: word,
-            cond: cond,
+            word,
+            cond,
             op_code: OpCode::ARM_OpCode,
             
             //Shift relevant data
@@ -228,21 +251,21 @@ impl Instruction<u32> {
         let cond = 0;//TODO: Filter out conditions
 
         Instruction::<u32> {
-                rs: rs,
-                rm: rm,
-                rd_lo: rd_lo,
-                rn: rn,
-                rd: rd,
+                rs,
+                rm,
+                rd_lo,
+                rn,
+                rd,
 
                 // Discriminant factors
                 tag: Instructions::DataProcessing,
-                set : set,
+                set,
                 accumulate: Some(accumulate),
                 signed: Some(signed),
                 
                 // Data for all the Instructions
-                word: word,
-                cond: cond,
+                word,
+                cond,
                 op_code: OpCode::ARM_OpCode,
                 
                 //Shift relevant data
@@ -285,7 +308,7 @@ impl Instruction<u32> {
                 signed: None,
                 
                 // Data for all the Instructions
-                word: word,
+                word,
                 cond: 0,
                 op_code: OpCode::ARM_OpCode,
                 
@@ -326,6 +349,7 @@ pub enum ARM_OpCode {
     SUB =  2,
     TEQ =  9,
     TST =  8,
+    UNDEFINED = 0xff,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -373,6 +397,16 @@ pub enum Bit {
     Unset = 0,
 }
 
+impl Bit {
+    pub fn bit_from(word:u32)-> Bit{
+        match word {
+            0 => Bit::Unset,
+            1 => Bit::Set,
+            _ => {panic!("Illegal word value passed to Bit!");},
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -382,12 +416,25 @@ mod test {
         let word: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000;
         let inst = Instruction::<u32>::from_word(word).unwrap();
         assert_eq!(inst.tag, Instructions::DataProcessing); 
+        assert_eq!(inst.mode, Mode::ARM);
     }
 
     #[test]
     fn test_nop_from_word(){
         let word: u32 = 0b0000_0110_0000_0000_0000_0000_0001_0000;
         let inst = Instruction::<u32>::from_word(word).unwrap();
-        assert_eq!(inst.tag, Instructions::NOP); 
+        assert_eq!(inst.tag, Instructions::NOP);
+        assert_eq!(inst.mode, Mode::ARM);
+        assert_eq!(inst.cycles, 1);
     }
+
+    #[test]
+    fn test_multiply_from_word(){
+        let word: u32 = 0b0000_0000_0011_0011_0000_0000_1001_0000;
+        let inst = Instruction::<u32>::from_word(word).unwrap();
+        assert_eq!(inst.tag, Instructions::Multiply);
+        assert_eq!(inst.mode, Mode::ARM);
+        // assert_eq!(inst.cycles, 1); TODO: Determine proper clock cycles taken
+    }
+
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::upper_case_acronyms)]
+
 use crate::RAM;
 use crate::Timer;
 use crate::RegisterFile;
@@ -132,7 +134,7 @@ impl CPU {
         }
     }
 
-    pub fn toggle_state(&mut self, instruction: T )
+    pub fn toggle_state(&mut self, instruction: T)
     where T: Instruction {
         // TODO: Implement instructions!!!
         if true || true { //instruction is BX or Interrupt
@@ -150,8 +152,8 @@ impl CPU {
     where T: Instruction {
         // TODO: Verify this increment as we generate it after executing the instruction
         let increment = match self.prev {
-          State::ARM => 2 as i32,
-          State::THUMB => 4 as i32,
+          State::ARM => 2 as u32,
+          State::THUMB => 4 as u32,
           State::UNDEFINED => panic!("Undefined State found before PC increment!"),
         };
 
@@ -162,7 +164,7 @@ impl CPU {
         self.increment_pc(increment)
     }
 
-    fn increment_pc(&mut self, increment: i32){
+    fn increment_pc(&mut self, increment: u32){
         self.pc += increment;
     }
 
