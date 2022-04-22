@@ -279,7 +279,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_new() {
+    fn test_new_register() {
         let register_file: RegisterFile = RegisterFile::new();
 
         assert_eq!(register_file.mode, Mode::PSR_MODE_SYS);

@@ -1,4 +1,6 @@
 #![allow(unused_imports)]
+#![allow(dead_code)]
+
 use std::fs::{File};
 // use std::env;
 use std::io::{prelude::*};

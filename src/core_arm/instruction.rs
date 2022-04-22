@@ -156,9 +156,9 @@ impl Inst<u32> for Instruction<u32> {
             dbg!("Received: {:?} | Extracted: {:?}", word, filter);
             
             match filter {
-                0 => {/* DATA Processing / PSR Instruction here*/ Some(Instruction::<u32>::DataProcessing(word))},
+                0 => {Some(Instruction::<u32>::DataProcessing(word))},
                 0x09 | 0x19 | 0x29 | 0x39  => {Some(Instruction::<u32>::Multiply(word))},
-                // 0x89 | 0xC9 | 0xE9 | 0xF9 => {Some(multiply_long(word))},
+                0xA9 | 0xC9 | 0xE9 | 0xF9 => {Some(Instruction::<u32>::MultiplyLong(word))},
                 // 0x121 => {Some(bx(word))},
                 // 0xA00 | 0xB00 => {Some(branch(word))},
                 // 0x400 | 0x600 | 0x700 | 0x780 | 0x7C0 | 0x7E0 | 0x7F0 => {Some(single_data_transfer(word))},
@@ -173,9 +173,9 @@ impl Inst<u32> for Instruction<u32> {
 
                 //TODO: Verify these numbers
                 0x601 => {Some(Instruction::<u32>::Undefined(word))}, //Undefined instruction according to manual
-                _ => {unimplemented!("Oh-oh! Unimplemented Instruction")},
+                _ => {unimplemented!("Oh-oh! Unimplemented Instruction: {:?}", filter)},
             }
-        }   
+    }   
 }
 
 impl Instruction<u32> {
@@ -226,7 +226,62 @@ impl Instruction<u32> {
             
             //Shift relevant data
             shift_ammount: Some(0),//TODO: FIX THIS ONE
-            shift: Some(Shift::LSL),
+            shift: None,
+            
+            // Mode of the instruction (ARM or THUMB)
+            mode: Mode::ARM,
+            cycles: 4,
+        }
+    }
+
+    pub fn MultiplyLong(word: u32) -> Self {
+        let _rs = shift_right!(word, 8);
+        let rs: u32 = apply_mask!(_rs, 0xF);
+        
+        let rm: u32 = apply_mask!(word, 0xF);
+
+        // let _rn = shift_right!(word, 12);
+        // let rn: u32 = apply_mask!(_rn, 0xF);
+
+        let _rd = shift_right!(word, 16);
+        let rd: u32 = apply_mask!(_rd, 0xF);
+
+        let _rd_lo: u32 = shift_right!(word, 12);
+        let rd_lo: u32 = apply_mask!(_rd_lo, 0xf);
+        
+        let _s = shift_right!(word, 20);
+        let set: Bit = Bit::bit_from(apply_mask!(_s, 0x01));//TODO: Properly check this
+        
+        let _acc = shift_right!(word, 21);
+        let accumulate = Bit::bit_from(apply_mask!(_acc, 0x01));
+
+        let _signed = shift_right!(word, 22);
+        let signed: Bit = Bit::bit_from(apply_mask!(_signed, 0x01));//Doesnt matter here 
+
+        let _cond = shift_right!(word, 28);
+        let cond = apply_mask!(_cond, 0xF);
+
+        Instruction::<u32> {
+            rs,
+            rm,
+            rd_lo,
+            rn: 0,
+            rd,
+
+            // Discriminant factors
+            tag: Instructions::MultiplyLong,
+            set,
+            accumulate: Some(accumulate),
+            signed: Some(signed),
+            
+            // Data for all the Instructions
+            word,
+            cond,
+            op_code: OpCode::ARM_OpCode,
+            
+            //Shift relevant data
+            shift_ammount: Some(0),//TODO: FIX THIS ONE
+            shift: None,
             
             // Mode of the instruction (ARM or THUMB)
             mode: Mode::ARM,
@@ -235,20 +290,30 @@ impl Instruction<u32> {
     }
 
     pub fn DataProcessing(word: u32) -> Self {
-        let rs: u32 = 0;
-        let rm: u32 = 0;
-
-        let rn: u32 = 0;
-        let rd: u32 = 0;
-
-        let rd_lo: u32 = 0;
+        let _rs = shift_right!(word, 8);
+        let rs: u32 = apply_mask!(_rs, 0xF);
         
-        let set: Bit = Bit::Unset;//TODO: Properly check this
-        let accumulate: Bit = Bit::Unset;
+        let rm: u32 = apply_mask!(word, 0xF);
 
-        let signed: Bit = Bit::Unset;
+        let _rn = shift_right!(word, 12);
+        let rn: u32 = apply_mask!(_rn, 0xF);
 
-        let cond = 0;//TODO: Filter out conditions
+        let _rd = shift_right!(word, 16);
+        let rd: u32 = apply_mask!(_rd, 0xF);
+
+        let rd_lo: u32 = 0;//Doesnt apply
+        
+        let _s = shift_right!(word, 20);
+        let set: Bit = Bit::bit_from(apply_mask!(_s, 0x01));//TODO: Properly check this
+        
+        let _acc = shift_right!(word, 21);
+        let accumulate = Bit::bit_from(apply_mask!(_acc, 0x01));
+
+        let signed: Bit = Bit::Unset;//Doesnt matter here 
+
+        let _cond = shift_right!(word, 28);
+        let cond = apply_mask!(_cond, 0xF);
+
 
         Instruction::<u32> {
                 rs,
@@ -435,6 +500,17 @@ mod test {
         assert_eq!(inst.tag, Instructions::Multiply);
         assert_eq!(inst.mode, Mode::ARM);
         // assert_eq!(inst.cycles, 1); TODO: Determine proper clock cycles taken
+    }
+
+    #[test]
+    fn test_multiply_long_from_word(){
+        let word: u32 = 0b0000_0000_1010_1111_1010_0000_1001_0000;
+        let inst = Instruction::<u32>::from_word(word).unwrap();
+        assert_eq!(inst.tag, Instructions::MultiplyLong);
+        assert_eq!(inst.mode, Mode::ARM);
+        assert_eq!(inst.rd, 0xF);// Rd hi -> 15
+        assert_eq!(inst.rd_lo, 0xA);// Rd Lo -> 10
+        // assert_eq!(inst.accumulate.unwrap(), Bit::Set);
     }
 
 }
