@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/tauri';
 import { Grid } from '../App';
 import styled from 'styled-components';
 
@@ -69,7 +69,7 @@ export default class Display extends Component {
 
     componentDidMount() {
         // const invoke = window.__TAURI_IPC__.invoke
-        // invoke('read_rom').then((rom) => console.log(rom[1]))
+        invoke('read_rom').then((rom) => console.log(rom));
         const pixels = getInitialPixels();
         this.setState({pixels});
     }

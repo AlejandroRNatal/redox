@@ -15,7 +15,7 @@ fn main() {
 
 
 #[tauri::command]
-fn read_rom() -> Vec<u32> {
+fn read_rom() -> String {
   let rom = "../../src/pokemon_emerald.GBA";
   let mut ram = RAM::new();
   let buff = ram.load_rom(&rom);
@@ -25,7 +25,7 @@ fn read_rom() -> Vec<u32> {
     Err(error) => panic!("Could not open : {:?}", error),
   };
 
- (&mut ram).load_rom_to_internal(buff);
-
-  ram.game_rom
+  (&mut ram).load_rom_to_internal(buff);
+  println!("Hello from Rust");
+  format!("{:?}", ram.game_rom)
 }
