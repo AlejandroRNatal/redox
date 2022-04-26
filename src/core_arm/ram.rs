@@ -49,11 +49,10 @@ impl RAM{
             iwram: Vec::<u32>::with_capacity(32_768),
             ewram: Vec::<u32>::with_capacity(262_144),// 256 KBytes
             vram:  Vec::<u32>::with_capacity(98_304), // 96 Kbytes
-            game_rom:   Vec::<u32>::with_capacity(1024),
+            game_rom: Vec::<u32>::with_capacity(1024),
             game_ram: Vec::<u32>::new(),
             mode:  Mode::Word,
             state: State::Read,
-
         }
     }
 
@@ -168,26 +167,26 @@ impl RAM{
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn test_load_rom() {
-    //     let rom = "src/pokemon_emerald.GBA";
-    //     let mut ram: RAM = RAM::new();
+    #[test]
+    fn test_load_rom() {
+        let rom = "src/pokemon_emerald.GBA";
+        let mut ram: RAM = RAM::new();
         
-    //     let buff = ram.load_rom(&rom);
+        let buff = ram.load_rom(&rom);
 
-    //     let buff =  match buff {
-    //         Ok(res) => res,
-    //         Err(error) => panic!("Could not open ROM: {:?}", error),
-    //     };
+        let buff =  match buff {
+            Ok(res) => res,
+            Err(error) => panic!("Could not open ROM: {:?}", error),
+        };
 
-    //     (&mut ram).load_rom_to_internal(buff);
+        (&mut ram).load_rom_to_internal(buff);
 
-    //     for word in ram.game_rom.iter() {
-    //         assert_eq!(word, word, "Check byte is byte xD");
-    //         print!("{:#32b}", word);
-    //         break;
-    //     }
-    // }
+        for word in ram.game_rom.iter() {
+            assert_eq!(word, word, "Check byte is byte xD");
+            print!("{:#32b}", word);
+            break;
+        }
+    }
 
     // #[test]
     // fn test_load_bios() {

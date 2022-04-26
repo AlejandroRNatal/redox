@@ -2,10 +2,7 @@
 #![allow(dead_code)]
 
 use std::fs::{File};
-// use std::env;
 use std::io::{prelude::*};
-// use std::path::Path;
-
 mod core_arm;
 
 mod prelude {
@@ -39,7 +36,7 @@ fn load_rom() -> Vec<u8> {
     let v = match result {
 
         Ok(result) => {result},
-        Err(error) => {print!("Something went wrong: {}", error); Vec::<u8>::new()},
+        Err(error) => {print!("Something went wrong: {error}"); Vec::<u8>::new()},
     };
 
     v

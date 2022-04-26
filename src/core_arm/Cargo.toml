@@ -1,0 +1,8 @@
+[package]
+name = "core_arm"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+name = "core_arm"
+path = "lib.rs"

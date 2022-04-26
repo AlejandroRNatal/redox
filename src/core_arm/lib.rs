@@ -1,5 +1,7 @@
-pub mod RAM;
-pub mod Instruction;
+pub mod ram;
+pub mod instruction;
+// pub mod cpu;
 
-pub use crate::RAM;
-pub use crate::Instruction;
+pub use crate::ram::RAM;
+pub use crate::instruction::Instruction;
+// pub use crate::cpu::CPU;

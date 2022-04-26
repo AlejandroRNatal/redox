@@ -1,3 +1,6 @@
+[workspace]
+members = ["src/core_arm", "gui/src-tauri"]
+
 [package]
 name = "redox"
 version = "0.1.0"

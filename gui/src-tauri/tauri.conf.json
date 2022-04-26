@@ -1,11 +1,12 @@
 {
   "package": {
-    "productName": "frontend",
+    "productName": "redox-gui",
     "version": "0.1.0"
   },
   "build": {
-    "distDir": "/resources",
-    "devPath": "localhost",
+    "withGlobalTauri": true,
+    "distDir": "../gui/src",
+    "devPath": "http://localhost:3000",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },

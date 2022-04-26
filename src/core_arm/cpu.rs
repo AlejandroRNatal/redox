@@ -1,9 +1,12 @@
 #![allow(clippy::upper_case_acronyms)]
+#![allow(dead_code)]
 
 use crate::RAM;
 use crate::Timer;
 use crate::RegisterFile;
 use crate::Instruction;
+
+use crate::Instruction::Instructions;
 
 // 16.78 MHz -> 16.78 x 10 ^ (6) Hz 
 const FREQUENCY: f32 = 16.78 * 1_000_000;
@@ -137,7 +140,8 @@ impl CPU {
     pub fn toggle_state(&mut self, instruction: T)
     where T: Instruction {
         // TODO: Implement instructions!!!
-        if true || true { //instruction is BX or Interrupt
+        if instruction.tag == Instructions::Branching ||
+           instruction.tag == Instructions::SoftInterrupt { //instruction is BX or Interrupt
             let state_bit = 1;
 
             match instruction & state_bit {
@@ -157,7 +161,7 @@ impl CPU {
           State::UNDEFINED => panic!("Undefined State found before PC increment!"),
         };
 
-        match instruction {
+        match instruction.tag {
             _=> {}
         }
 
@@ -217,6 +221,7 @@ mod tests {
 
     #[test]
     fn test_cpu(){
+        let cpu  = CPU::new();
 
-    }
+    } 
 }
