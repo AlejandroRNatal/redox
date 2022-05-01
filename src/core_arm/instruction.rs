@@ -36,6 +36,7 @@ pub enum Instructions {
     MultiplyLong,
     DataProcessing,
     Branching,
+    BranchExchange,
     SingleDataTransfer,
     SignedDataTransfer,
     BlockDataTransfer,
@@ -69,6 +70,9 @@ pub struct Instruction<T> {
     cond: T,
     op_code: OpCode,
     
+    //offset
+    offset: T,
+
     //Shift relevant data
     shift_ammount: Option<T>,
     shift: Option<Shift>,
@@ -138,7 +142,14 @@ impl Inst<u32> for Instruction<u32> {
     }
 
     fn offset(&self) -> u32 {
-        0
+        // No offset for these
+        if self.tag == Instructions::MultiplyLong {
+            0
+        }
+        else{
+            0
+        }
+        
     }
 
     fn cycles(&self) -> u8 {
@@ -159,7 +170,7 @@ impl Inst<u32> for Instruction<u32> {
                 0 => {Some(Instruction::<u32>::DataProcessing(word))},
                 0x09 | 0x19 | 0x29 | 0x39  => {Some(Instruction::<u32>::Multiply(word))},
                 0xA9 | 0xC9 | 0xE9 | 0xF9 => {Some(Instruction::<u32>::MultiplyLong(word))},
-                // 0x121 => {Some(bx(word))},
+                0x121 => {Some(Instruction::<u32>::BranchExchange(word))},
                 // 0xA00 | 0xB00 => {Some(branch(word))},
                 // 0x400 | 0x600 | 0x700 | 0x780 | 0x7C0 | 0x7E0 | 0x7F0 => {Some(single_data_transfer(word))},
                 // 0x09 => {Some(signed_data_transfer(word))}, //This instruction clashes with multiply
@@ -224,6 +235,8 @@ impl Instruction<u32> {
             cond,
             op_code: OpCode::ARM_OpCode,
             
+            offset: 0,
+
             //Shift relevant data
             shift_ammount: Some(0),//TODO: FIX THIS ONE
             shift: None,
@@ -279,6 +292,8 @@ impl Instruction<u32> {
             cond,
             op_code: OpCode::ARM_OpCode,
             
+            offset: 0,
+
             //Shift relevant data
             shift_ammount: Some(0),//TODO: FIX THIS ONE
             shift: None,
@@ -314,7 +329,6 @@ impl Instruction<u32> {
         let _cond = shift_right!(word, 28);
         let cond = apply_mask!(_cond, 0xF);
 
-
         Instruction::<u32> {
                 rs,
                 rm,
@@ -332,6 +346,8 @@ impl Instruction<u32> {
                 word,
                 cond,
                 op_code: OpCode::ARM_OpCode,
+                
+                offset: 0,
                 
                 //Shift relevant data
                 shift_ammount: Some(0),//TODO: FIX THIS ONE
@@ -352,12 +368,12 @@ impl Instruction<u32> {
 
         let rd_lo: u32 = 0;
         
-        let set: Bit = Bit::Unset;//TODO: Properly check this
+        let set: Bit = Bit::Unset;
         let accumulate: Bit = Bit::Unset;
 
         let signed: Bit = Bit::Unset;
 
-        let cond = 0;//TODO: Filter out conditions
+        let cond = 0;
 
         Instruction::<u32> {
                 rs: 0,
@@ -377,6 +393,57 @@ impl Instruction<u32> {
                 cond: 0,
                 op_code: OpCode::ARM_OpCode,
                 
+                offset: 0,
+                //Shift relevant data
+                shift_ammount: None,
+                shift: None,
+                
+                mode: Mode::ARM,
+                cycles: 1,
+        }
+    }
+
+    //TODO: Finish implementing this instruction
+    pub fn SingleDataTransfer(word: u32) -> Self {
+        let rs: u32 = 0;
+        let rm: u32 = 0;
+
+        let _rn = shift_right!(word, 16); 
+        let rn: u32 = apply_mask!(_rn, 0x0F);
+
+        let _rd = shift_right!(word, 12);
+        let rd: u32 = apply_mask!(_rd, 0x0F);
+
+        let rd_lo: u32 = 0;
+        
+        let set: Bit = Bit::Unset;//TODO: Properly check this
+        let accumulate: Bit = Bit::Unset;
+
+        let signed: Bit = Bit::Unset;
+
+        let _cond = shift_right!(word, 28);
+        let cond = apply_mask!(_cond,0x0F);//TODO: Filter out conditions
+
+        let offset = apply_mask!(word, 0xFFF);
+        Instruction::<u32> {
+                rs: 0,
+                rm: 0,
+                rd_lo: 0,
+                rn: rn,
+                rd: rd,
+
+                // Discriminant factors
+                tag: Instructions::NOP,
+                set : Bit::Unset,
+                accumulate: None,
+                signed: None,
+                
+                // Data for all the Instructions
+                word,
+                cond,
+                op_code: OpCode::ARM_OpCode,
+                
+                offset,
                 //Shift relevant data
                 shift_ammount: None,//TODO: FIX THIS ONE
                 shift: None,
@@ -384,6 +451,50 @@ impl Instruction<u32> {
                 // Mode of the instruction (ARM or THUMB)
                 mode: Mode::ARM,
                 cycles: 1,
+        }
+    }
+
+
+    pub fn BranchExchange(word: u32) -> Self {
+
+        let rn: u32 = apply_mask!(word, 0x0F);
+
+        let _cond = shift_right!(word, 28);
+        let cond = apply_mask!(_cond,0x0F);
+
+        let rn_0_bit = apply_mask!(word, 0x01);
+
+        let mode = match rn_0_bit{
+            0 => {Mode::ARM},
+            _ => {Mode::THUMB}
+        };
+
+        Instruction::<u32> {
+                rs: 0,
+                rm: 0,
+                rd_lo: 0,
+                rn: rn,
+                rd: 0,
+
+                // Discriminant factors
+                tag: Instructions::BranchExchange,
+                set : Bit::Unset,
+                accumulate: None,
+                signed: None,
+                
+                // Data for all the Instructions
+                word,
+                cond,
+                op_code: OpCode::ARM_OpCode,//TODO: Check manual here to determine what mode to exec
+                
+                offset: 0,
+                //Shift relevant data
+                shift_ammount: None,
+                shift: None,
+                
+                // Mode of the instruction (ARM or THUMB)
+                mode,
+                cycles: 1,//TODO: Determine how many based on manual
         }
     }
 }
@@ -499,7 +610,6 @@ mod test {
         let inst = Instruction::<u32>::from_word(word).unwrap();
         assert_eq!(inst.tag, Instructions::Multiply);
         assert_eq!(inst.mode, Mode::ARM);
-        // assert_eq!(inst.cycles, 1); TODO: Determine proper clock cycles taken
     }
 
     #[test]
@@ -510,7 +620,25 @@ mod test {
         assert_eq!(inst.mode, Mode::ARM);
         assert_eq!(inst.rd, 0xF);// Rd hi -> 15
         assert_eq!(inst.rd_lo, 0xA);// Rd Lo -> 10
-        // assert_eq!(inst.accumulate.unwrap(), Bit::Set);
+    }
+    
+    #[test]
+    fn test_bx_arm_from_word(){
+        let word: u32 = 0b0000_0001_0010_1111_1111_1111_0001_0000;// R0
+        let inst = Instruction::<u32>::from_word(word).unwrap();
+
+        assert_eq!(inst.tag, Instructions::BranchExchange);
+        assert_eq!(inst.rn, 0x0);//Register 0
+        assert_eq!(inst.mode, Mode::ARM);
     }
 
+    #[test]
+    fn test_bx_thumb_from_word(){
+        let word: u32 = 0b0000_0001_0010_1111_1111_1111_0001_0001;// R1
+        let inst = Instruction::<u32>::from_word(word).unwrap();
+
+        assert_eq!(inst.tag, Instructions::BranchExchange);
+        assert_eq!(inst.rn, 0x1);//Register 1
+        assert_eq!(inst.mode, Mode::THUMB);
+    }
 }

@@ -58,7 +58,6 @@ class Pixel extends Component {
 
 }
 
-
 export default class Display extends Component {
     constructor() {
         super();
@@ -68,8 +67,7 @@ export default class Display extends Component {
     }
 
     componentDidMount() {
-        // const invoke = window.__TAURI_IPC__.invoke
-        invoke('read_rom').then((rom) => console.log(rom));
+        // invoke('read_rom').then((rom) => console.log(rom));
         const pixels = getInitialPixels();
         this.setState({pixels});
     }

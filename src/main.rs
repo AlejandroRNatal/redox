@@ -9,7 +9,6 @@ mod prelude {
     pub use crate::core_arm::*;
 }
 
-// use prelude::*;
 
 fn load_bios() -> [u8; 16384] {
     let filename  = "src/gba_bios.bin";
@@ -42,7 +41,7 @@ fn load_rom() -> Vec<u8> {
     v
 }
 
-fn main() -> Result<(), ()>{
+fn main() -> Result<(), ()> {
     
     // let bios = load_bios();
     // println!("BIOS:");
