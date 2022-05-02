@@ -1,19 +1,28 @@
 
 import './App.css';
-import Display from './Display/screen';
+import Display from './Display/display';
 import React from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
-import Dissassembler from './dissassembler/dissassembler';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Dissassembler from './disassembler/disassembler';
+import Navbar from './navbar/navbar';
+
 
 
 function App() {
 
  
   return (
-    <div className="App">
-      <Display></Display>
-      <Dissassembler></Dissassembler>
-    </div>
+
+    <Router>
+      <Navbar />
+      <Routes>
+          <Route path="/" element={<Display/>}/>
+          <Route path="/disassembler" element={<Dissassembler/>}/>
+      </Routes>
+      
+    </Router>
+
+    
   );
 }
 

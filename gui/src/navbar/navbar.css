@@ -1,0 +1,33 @@
+.navbar {
+    display: flex;
+    background-color: black;
+    width: 100%;
+    position: fixed;
+    color: #fff;
+    /* padding: 1px; */
+}
+
+li {
+
+    color: #fff;
+    border-right: 1px solid white;
+    display: inline;
+    list-style-type: none;
+    margin: 0;
+    padding-left: 4px;
+    padding-right: 8px;
+    color: white;
+    float: left;
+    text-decoration: none;
+}
+
+Link {
+    color: inherit;
+    text-align: center;
+    text-decoration: none;
+}
+
+Link:hover {
+    color: #fff;
+    background-color: #f3f3f3;
+}

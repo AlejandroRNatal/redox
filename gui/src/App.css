@@ -1,7 +1,14 @@
 .App {
   text-align: center;
   margin: 0;
-  display: inline-flexbox;
+  /* display: inline-flexbox; */
+}
+
+.main-view{
+  max-width: 660px;
+  max-height: 480px;
+  margin: 0 -10px 0 0;
+  padding: 0;
 }
 
 div{
@@ -10,7 +17,7 @@ div{
   display: flex;
 }
 
-
+/* 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -20,7 +27,7 @@ div{
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
-}
+} */
 
 .App-header {
   background-color: #282c34;

@@ -31,7 +31,7 @@ pub enum State{
 
 #[derive( Debug)]
 pub struct RAM {
-    pub bios:  Vec::<u32>, //BIOS
+    pub bios:  Vec::<u8>, //BIOS
     pub iwram:  Vec::<u32>,// 32 KBytes
     pub ewram:  Vec::<u32>,// 256 KBytes
     pub vram:   Vec::<u32>, // 96 Kbytes
@@ -45,7 +45,7 @@ impl RAM{
 
     pub fn new() -> Self{
         RAM {
-            bios: Vec::<u32>::with_capacity(16_384),
+            bios: Vec::<u8>::with_capacity(16_384),
             iwram: Vec::<u32>::with_capacity(32_768),
             ewram: Vec::<u32>::with_capacity(262_144),// 256 KBytes
             vram:  Vec::<u32>::with_capacity(98_304), // 96 Kbytes
@@ -71,7 +71,7 @@ impl RAM{
 
 
         for b in buffer.iter() {
-            self.bios.push(*b as u32);
+            self.bios.push(*b as u8);
         }
     }
 

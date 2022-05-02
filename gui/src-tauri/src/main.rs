@@ -26,6 +26,8 @@ fn read_rom() -> String {
   };
 
   (&mut ram).load_rom_to_internal(buff);
-  println!("Hello from Rust");
+  // println!("Hello from Rust");
+  // println!("{}", format!("{:?}", ram.game_rom));
   format!("{:?}", ram.game_rom)
+  // ram.game_rom.clone()
 }

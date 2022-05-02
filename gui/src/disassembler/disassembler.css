@@ -1,0 +1,13 @@
+p {
+    text-align: center;
+    max-width: fit-content;
+    max-height: 40%;
+    color: white;
+    background-color: black;
+    /* padding: 3%; */
+    margin: auto;
+}
+
+.disassembler {
+    padding: 3px;
+}

@@ -1,6 +1,7 @@
 import { React, Component} from 'react'
 import { invoke } from '@tauri-apps/api/tauri'
 
+import './disassembler.css';
 
 export default class Dissassembler extends Component {
 
@@ -9,16 +10,19 @@ export default class Dissassembler extends Component {
         this.state = {data: ["Empty"]};
     }
 
+    async componentDidMount(){
+       await this.fetchData()
+    }
+    
     render(){
-        const {data} = this.state;
-
+        const {data} = this.state
+        
         return (
-            <div className="dissassembler">
-                <button onClick={this.fetchData.bind(this)}>click</button>
+            <div className="disassembler">
                 
-                {[...Array(data)].map((line) => {
+                {data.map(( line, idx) => {
                     return (
-                        <p>{line}</p>
+                        <p key={idx}>{line}</p>
                     )
                 })}
             </div>
@@ -27,7 +31,7 @@ export default class Dissassembler extends Component {
     
     async fetchData() {
         let props = await invoke('read_rom');
-        this.setState({data: props})
-        // return props;
+        
+        this.setState({data: [props]})
     }
 }
